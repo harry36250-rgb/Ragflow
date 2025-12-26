@@ -360,29 +360,49 @@ def tokenize_table(tbls, doc, eng, batch_size=10):
 
 def attach_media_context(chunks, table_context_size=0, image_context_size=0):
     """
-    Attach surrounding text chunk content to media chunks (table/image).
-    Best-effort ordering: if positional info exists on any chunk, use it to
-    order chunks before collecting context; otherwise keep original order.
+    为图片和表格块添加上下文文本（前后相邻的文本块）
+    
+    功能说明：
+    - 为图片块添加前后相邻的文本块作为上下文（受 image_context_size 限制）
+    - 为表格块添加前后相邻的文本块作为上下文（受 table_context_size 限制）
+    - 只从文本块中提取上下文，不会从其他图片/表格块中提取
+    - 如果有位置信息，会先按位置排序，确保上下文来自真正相邻的块
+    
+    Args:
+        chunks: 块列表，每个元素是一个字典，包含 text/content_with_weight、image、doc_type_kwd 等字段
+        table_context_size: 表格上下文大小（token 数），前后各添加这么多 token 的文本
+        image_context_size: 图片上下文大小（token 数），前后各添加这么多 token 的文本
+    
+    Returns:
+        list: 修改后的块列表（原地修改，也会返回）
     """
     from . import rag_tokenizer
+    
+    # 如果块列表为空，或者两个上下文大小都为 0，直接返回
     if not chunks or (table_context_size <= 0 and image_context_size <= 0):
         return chunks
 
     def is_image_chunk(ck):
+        """判断是否为图片块"""
+        # 如果明确标记为图片类型，返回 True
         if ck.get("doc_type_kwd") == "image":
             return True
-
+        # 如果有图片但没有文本，也认为是图片块
         text_val = ck.get("content_with_weight") if isinstance(ck.get("content_with_weight"), str) else ck.get("text")
         has_text = isinstance(text_val, str) and text_val.strip()
         return bool(ck.get("image")) and not has_text
 
     def is_table_chunk(ck):
+        """判断是否为表格块"""
         return ck.get("doc_type_kwd") == "table"
 
     def is_text_chunk(ck):
+        """判断是否为文本块（既不是图片也不是表格）"""
         return not is_image_chunk(ck) and not is_table_chunk(ck)
 
     def get_text(ck):
+        """从块中提取文本内容"""
+        # 优先使用 content_with_weight，否则使用 text
         if isinstance(ck.get("content_with_weight"), str):
             return ck["content_with_weight"]
         if isinstance(ck.get("text"), str):
@@ -390,6 +410,8 @@ def attach_media_context(chunks, table_context_size=0, image_context_size=0):
         return ""
 
     def split_sentences(text):
+        """将文本按句子分割（支持中英文标点）"""
+        # 匹配句子结束符：.。！？!?；;：:\n
         pattern = r"([.。！？!?；;：:\n])"
         parts = re.split(pattern, text)
         sentences = []
@@ -397,17 +419,31 @@ def attach_media_context(chunks, table_context_size=0, image_context_size=0):
         for p in parts:
             if not p:
                 continue
+            # 如果是标点符号，添加到缓冲区并完成一个句子
             if re.fullmatch(pattern, p):
                 buf += p
                 sentences.append(buf)
                 buf = ""
             else:
+                # 否则继续累积到缓冲区
                 buf += p
+        # 处理最后一个句子（如果没有以标点结尾）
         if buf:
             sentences.append(buf)
         return sentences
 
     def trim_to_tokens(text, token_budget, from_tail=False):
+        """
+        根据 token 预算截断文本
+        
+        Args:
+            text: 要截断的文本
+            token_budget: token 预算（最大 token 数）
+            from_tail: 如果为 True，从尾部开始截取；否则从头部开始
+        
+        Returns:
+            str: 截断后的文本
+        """
         if token_budget <= 0 or not text:
             return ""
         sentences = split_sentences(text)
@@ -416,36 +452,49 @@ def attach_media_context(chunks, table_context_size=0, image_context_size=0):
 
         collected = []
         remaining = token_budget
+        # 根据 from_tail 决定遍历顺序
         seq = reversed(sentences) if from_tail else sentences
         for s in seq:
             tks = num_tokens_from_string(s)
             if tks <= 0:
                 continue
+            # 如果当前句子超过剩余预算，只取这个句子并结束
             if tks > remaining:
                 collected.append(s)
                 break
+            # 否则添加到收集列表，并减少剩余预算
             collected.append(s)
             remaining -= tks
 
+        # 如果从尾部截取，需要反转回来
         if from_tail:
             collected = list(reversed(collected))
         return "".join(collected)
 
     def extract_position(ck):
+        """
+        从块中提取位置信息（页码、垂直位置、水平位置）
+        
+        Returns:
+            tuple: (页码, top, left) 或 (None, None, None)
+        """
         pn = None
         top = None
         left = None
         try:
+            # 尝试从不同字段获取页码
             if ck.get("page_num_int"):
                 pn = ck["page_num_int"][0]
             elif ck.get("page_number") is not None:
                 pn = ck.get("page_number")
 
+            # 尝试从不同字段获取垂直位置（top）
             if ck.get("top_int"):
                 top = ck["top_int"][0]
             elif ck.get("top") is not None:
                 top = ck.get("top")
 
+            # 尝试从不同字段获取水平位置（left/x0）
             if ck.get("position_int"):
                 left = ck["position_int"][0][1]
             elif ck.get("x0") is not None:
@@ -454,35 +503,49 @@ def attach_media_context(chunks, table_context_size=0, image_context_size=0):
             pn = top = left = None
         return pn, top, left
 
+    # ========== 第一步：按位置排序块 ==========
+    # 为每个块建立索引，并分类为有位置信息和无位置信息
     indexed = list(enumerate(chunks))
-    positioned_indices = []
-    unpositioned_indices = []
+    positioned_indices = []  # 有位置信息的块索引列表
+    unpositioned_indices = []  # 无位置信息的块索引列表
+    
     for idx, ck in indexed:
         pn, top, left = extract_position(ck)
+        # 如果有页码和垂直位置，认为有位置信息
         if pn is not None and top is not None:
             positioned_indices.append((idx, pn, top, left if left is not None else 0))
         else:
             unpositioned_indices.append(idx)
 
+    # 如果有位置信息，按位置排序：先按页码，再按 top（垂直位置），再按 left（水平位置），最后按原始索引
     if positioned_indices:
         positioned_indices.sort(key=lambda x: (int(x[1]), int(x[2]), int(x[3]), x[0]))
+        # 有位置信息的块在前，无位置信息的块在后
         ordered_indices = [i for i, _, _, _ in positioned_indices] + unpositioned_indices
     else:
+        # 如果没有位置信息，保持原始顺序
         ordered_indices = [idx for idx, _ in indexed]
 
+    # ========== 第二步：为每个图片/表格块添加上下文 ==========
     total = len(ordered_indices)
     for sorted_pos, idx in enumerate(ordered_indices):
         ck = chunks[idx]
+        
+        # 确定当前块需要的上下文大小
         token_budget = image_context_size if is_image_chunk(ck) else table_context_size if is_table_chunk(ck) else 0
         if token_budget <= 0:
-            continue
+            continue  # 如果不需要上下文，跳过
 
-        prev_ctx = []
-        remaining_prev = token_budget
+        # ========== 向前查找上下文（前面的文本块） ==========
+        prev_ctx = []  # 前面的上下文文本列表
+        remaining_prev = token_budget  # 剩余的 token 预算
+        
+        # 从当前位置向前遍历
         for prev_idx in range(sorted_pos - 1, -1, -1):
             if remaining_prev <= 0:
-                break
+                break  # 预算用完，停止查找
             neighbor_idx = ordered_indices[prev_idx]
+            # 只从文本块中提取上下文，遇到图片/表格块就停止
             if not is_text_chunk(chunks[neighbor_idx]):
                 break
             txt = get_text(chunks[neighbor_idx])
@@ -491,19 +554,25 @@ def attach_media_context(chunks, table_context_size=0, image_context_size=0):
             tks = num_tokens_from_string(txt)
             if tks <= 0:
                 continue
+            # 如果文本超过剩余预算，从尾部截断
             if tks > remaining_prev:
                 txt = trim_to_tokens(txt, remaining_prev, from_tail=True)
                 tks = num_tokens_from_string(txt)
             prev_ctx.append(txt)
             remaining_prev -= tks
+        # 反转列表，因为是从后往前收集的
         prev_ctx.reverse()
 
-        next_ctx = []
-        remaining_next = token_budget
+        # ========== 向后查找上下文（后面的文本块） ==========
+        next_ctx = []  # 后面的上下文文本列表
+        remaining_next = token_budget  # 剩余的 token 预算
+        
+        # 从当前位置向后遍历
         for next_idx in range(sorted_pos + 1, total):
             if remaining_next <= 0:
-                break
+                break  # 预算用完，停止查找
             neighbor_idx = ordered_indices[next_idx]
+            # 只从文本块中提取上下文，遇到图片/表格块就停止
             if not is_text_chunk(chunks[neighbor_idx]):
                 break
             txt = get_text(chunks[neighbor_idx])
@@ -512,35 +581,42 @@ def attach_media_context(chunks, table_context_size=0, image_context_size=0):
             tks = num_tokens_from_string(txt)
             if tks <= 0:
                 continue
+            # 如果文本超过剩余预算，从头部截断
             if tks > remaining_next:
                 txt = trim_to_tokens(txt, remaining_next, from_tail=False)
                 tks = num_tokens_from_string(txt)
             next_ctx.append(txt)
             remaining_next -= tks
 
+        # 如果没有找到任何上下文，跳过
         if not prev_ctx and not next_ctx:
             continue
 
+        # ========== 合并上下文和当前块文本 ==========
         self_text = get_text(ck)
-        pieces = [*prev_ctx]
+        pieces = [*prev_ctx]  # 前面的上下文
         if self_text:
-            pieces.append(self_text)
-        pieces.extend(next_ctx)
-        combined = "\n".join(pieces)
+            pieces.append(self_text)  # 当前块文本
+        pieces.extend(next_ctx)  # 后面的上下文
+        combined = "\n".join(pieces)  # 用换行符连接
 
+        # ========== 更新块的内容 ==========
         original = ck.get("content_with_weight")
+        # 优先更新 content_with_weight，否则更新 text
         if "content_with_weight" in ck:
             ck["content_with_weight"] = combined
         elif "text" in ck:
             original = ck.get("text")
             ck["text"] = combined
 
+        # 如果内容有变化，重新计算 token 化结果
         if combined != original:
             if "content_ltks" in ck:
                 ck["content_ltks"] = rag_tokenizer.tokenize(combined)
             if "content_sm_ltks" in ck:
                 ck["content_sm_ltks"] = rag_tokenizer.fine_grained_tokenize(ck.get("content_ltks", rag_tokenizer.tokenize(combined)))
 
+    # ========== 第三步：如果有位置信息，按排序后的顺序重新排列块 ==========
     if positioned_indices:
         chunks[:] = [chunks[i] for i in ordered_indices]
 
@@ -844,71 +920,176 @@ def naive_merge(sections: str | list, chunk_token_num=128, delimiter="\n。；�
 
 
 def naive_merge_with_images(texts, images, chunk_token_num=128, delimiter="\n。；！？", overlapped_percent=0):
+    """
+    将多个 sections（文本+图片）合并成 chunks
+    
+    功能说明：
+    - 按照 chunk_token_num 限制，将多个 sections 合并成 chunks
+    - 如果当前 chunk 的 token 数未达到上限，继续添加新的 section
+    - 如果当前 chunk 的 token 数达到上限，创建新的 chunk
+    - 图片会被垂直拼接（concat_img）到同一个 chunk 中
+    - 支持自定义分隔符，可以按分隔符强制分割
+    
+    Args:
+        texts: 文本列表，每个元素可以是字符串或元组 (文本, 位置标签)
+        images: 图片列表，每个元素是 PIL.Image 对象或 None
+        chunk_token_num: 每个 chunk 的最大 token 数
+        delimiter: 分隔符字符串，支持自定义分隔符（用反引号包裹，如 `\n\n`）
+        overlapped_percent: 重叠百分比（0-100），用于控制 chunk 之间的重叠
+    
+    步骤：
+    1. 初始化 chunks 列表
+    2. 遍历所有 sections
+    3. 调用 add_chunk() 添加到 chunk
+    
+    """
     from deepdoc.parser.pdf_parser import RAGFlowPdfParser
+    
+    # 参数验证：文本和图片数量必须一致
     if not texts or len(texts) != len(images):
         return [], []
-    cks = [""]
-    result_images = [None]
-    tk_nums = [0]
+    
+    # 初始化：chunks 列表、图片列表、token 数列表
+    cks = [""]  # 当前只有一个空的 chunk
+    result_images = [None]  # 对应的图片列表
+    tk_nums = [0]  # 每个 chunk 的 token 数
 
     def add_chunk(t, image, pos=""):
+        """
+        核心分块函数：将文本和图片添加到 chunk 中
+        
+        关键逻辑：
+        1. 计算文本的 token 数
+        2. 判断是否需要创建新 chunk：
+           - 如果当前 chunk 为空，或
+           - 如果当前 chunk 的 token 数 > chunk_token_num * (100 - overlapped_percent)/100
+           则创建新 chunk
+        3. 否则合并到当前 chunk：
+           - 文本追加到当前 chunk
+           - 图片垂直拼接（concat_img）
+        
+        Args:
+            t: 文本内容
+            image: 图片对象（PIL.Image 或 None）
+            pos: 位置标签字符串（格式：@@页码\tx0\tx1\ttop\tbottom##）
+        
+        步骤： 
+        1. 计算文本的 token 数
+        2. 判断是否需要创建新 chunk
+        3. 创建新 chunk 或合并到当前 chunk
+        """
         nonlocal cks, result_images, tk_nums, delimiter
+        
+        # 计算文本的 token 数
         tnum = num_tokens_from_string(t)
+        
+        # 处理位置标签：如果没有提供，使用空字符串
         if not pos:
             pos = ""
+        # 如果文本太短（< 8 tokens），不添加位置标签
         if tnum < 8:
             pos = ""
-        # Ensure that the length of the merged chunk does not exceed chunk_token_num
+        
+        # ========== 判断是否需要创建新 chunk ==========
+        # 判断条件：当前 chunk 为空，或 token 数超过限制
+        # 限制 = chunk_token_num * (100 - overlapped_percent) / 100
+        # 例如：chunk_token_num=128, overlapped_percent=0，限制为 128
+        #      chunk_token_num=128, overlapped_percent=10，限制为 115.2
         if cks[-1] == "" or tk_nums[-1] > chunk_token_num * (100 - overlapped_percent)/100.:
+            # ========== 创建新 chunk ==========
+            # 如果有重叠，从上一个 chunk 的末尾提取重叠部分
             if cks:
                 overlapped = RAGFlowPdfParser.remove_tag(cks[-1])
-                t = overlapped[int(len(overlapped)*(100-overlapped_percent)/100.):] + t
+                # 计算重叠部分的起始位置
+                overlap_start = int(len(overlapped) * (100 - overlapped_percent) / 100.)
+                # 将重叠部分添加到新文本的开头
+                t = overlapped[overlap_start:] + t
+            
+            # 添加位置标签（如果还没有）
             if t.find(pos) < 0:
                 t += pos
+            
+            # 创建新 chunk
             cks.append(t)
             result_images.append(image)
             tk_nums.append(tnum)
         else:
+            # ========== 合并到当前 chunk ==========
+            # 添加位置标签（如果还没有）
             if cks[-1].find(pos) < 0:
                 t += pos
+            
+            # 文本追加到当前 chunk
             cks[-1] += t
+            
+            # 图片处理：如果当前 chunk 没有图片，直接赋值；否则垂直拼接
             if result_images[-1] is None:
                 result_images[-1] = image
             else:
+                # 垂直拼接图片：将新图片追加到现有图片下方
                 result_images[-1] = concat_img(result_images[-1], image)
+            
+            # 更新 token 数
             tk_nums[-1] += tnum
 
+    # ========== 处理自定义分隔符 ==========
+    # 从 delimiter 中提取自定义分隔符（用反引号包裹的部分，如 `\n\n`）
     custom_delimiters = [m.group(1) for m in re.finditer(r"`([^`]+)`", delimiter)]
     has_custom = bool(custom_delimiters)
+    
     if has_custom:
+        # 如果有自定义分隔符，按分隔符强制分割
+        # 构建正则表达式模式（按长度降序排列，确保长模式优先匹配）
         custom_pattern = "|".join(re.escape(t) for t in sorted(set(custom_delimiters), key=len, reverse=True))
+        
+        # 重新初始化
         cks, result_images, tk_nums = [], [], []
+        
+        # 遍历每个 section
         for text, image in zip(texts, images):
+            # 解包文本和位置标签
             text_str = text[0] if isinstance(text, tuple) else text
             text_pos = text[1] if isinstance(text, tuple) and len(text) > 1 else ""
+            
+            # 按自定义分隔符分割文本
             split_sec = re.split(r"(%s)" % custom_pattern, text_str)
+            
+            # 处理每个分割后的片段
             for sub_sec in split_sec:
+                # 跳过分隔符本身
                 if re.fullmatch(custom_pattern, sub_sec or ""):
                     continue
+                
+                # 构建文本片段
                 text_seg = "\n" + sub_sec
                 local_pos = text_pos
+                
+                # 如果文本太短，不添加位置标签
                 if num_tokens_from_string(text_seg) < 8:
                     local_pos = ""
+                
+                # 添加位置标签（如果还没有）
                 if local_pos and text_seg.find(local_pos) < 0:
                     text_seg += local_pos
+                
+                # 每个片段都创建一个独立的 chunk
                 cks.append(text_seg)
                 result_images.append(image)
                 tk_nums.append(num_tokens_from_string(text_seg))
+        
         return cks, result_images
 
+    # ========== 正常合并流程（无自定义分隔符） ==========
+    # 遍历所有 sections
     for text, image in zip(texts, images):
-        # if text is tuple, unpack it
+        # 如果 text 是元组，解包为 (文本, 位置标签)
         if isinstance(text, tuple):
             text_str = text[0]
             text_pos = text[1] if len(text) > 1 else ""
-            add_chunk("\n"+text_str, image, text_pos)
+            add_chunk("\n" + text_str, image, text_pos)
         else:
-            add_chunk("\n"+text, image)
+            # 否则直接使用文本
+            add_chunk("\n" + text, image)
 
     return cks, result_images
 

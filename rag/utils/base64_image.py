@@ -26,6 +26,15 @@ test_image = base64.b64decode(test_image_base64)
 
 
 async def image2id(d: dict, storage_put_func: partial, objname:str, bucket:str="imagetemps"):
+    """
+    将图片对象转换为存储 ID
+    
+    步骤：
+    1. 检查是否有图片
+    2. 将 PIL.Image 转换为 JPEG 字节流
+    3. 上传到对象存储
+    4. 生成 img_id 并替换
+    """
     import logging
     from io import BytesIO
     import trio
@@ -60,6 +69,14 @@ async def image2id(d: dict, storage_put_func: partial, objname:str, bucket:str="
 
 
 def id2image(image_id:str|None, storage_get_func: partial):
+    """
+    从对象存储下载图片，转换为 PIL.Image 对象
+    
+    步骤：
+    1. 解析 img_id（格式：bucket-filename）
+    2. 从对象存储下载图片
+    3. 转换为 PIL.Image 对象
+    """
     if not image_id:
         return
     arr = image_id.split("-")

@@ -42,8 +42,13 @@ from rag.utils.base64_image import image2id
 
 
 class ParserParam(ProcessParamBase):
+    """
+    Parser 组件的参数配置类
+    定义了各种文件类型支持的输出格式和默认配置
+    """
     def __init__(self):
         super().__init__()
+        # 定义每种文件类型允许的输出格式
         self.allowed_output_format = {
             "pdf": [
                 "json",
@@ -78,6 +83,7 @@ class ParserParam(ProcessParamBase):
             "video": [],
         }
 
+        # 定义各种文件类型的默认解析配置
         self.setups = {
             "pdf": {
                 "parse_method": "deepdoc",  # deepdoc/plain_text/tcadp_parser/vlm
@@ -172,11 +178,17 @@ class ParserParam(ProcessParamBase):
         }
 
     def check(self):
+        """
+        验证配置参数的有效性
+        检查各种文件类型的配置是否符合要求
+        """
+        # 检查 PDF 配置
         pdf_config = self.setups.get("pdf", {})
         if pdf_config:
             pdf_parse_method = pdf_config.get("parse_method", "")
             self.check_empty(pdf_parse_method, "Parse method abnormal.")
 
+            # 如果使用 VLM 解析方法，需要检查语言配置
             if pdf_parse_method.lower() not in ["deepdoc", "plain_text", "mineru", "tcadp parser"]:
                 self.check_empty(pdf_config.get("lang", ""), "PDF VLM language")
 
@@ -227,41 +239,67 @@ class ParserParam(ProcessParamBase):
 
 
 class Parser(ProcessBase):
+    """
+    Parser 组件主类
+    负责解析各种类型的文档（PDF、Word、Excel、PPT、图片、音频、视频、邮件等）
+    并将解析结果转换为统一的格式（JSON、Markdown、HTML、Text）
+    """
     component_name = "Parser"
 
     def _pdf(self, name, blob):
+        """
+        解析 PDF 文件的主方法
+        
+        Args:
+            name: PDF 文件名
+            blob: PDF 文件的二进制数据
+        """
+        # 更新进度回调，通知开始处理 PDF
         self.callback(random.randint(1, 5) / 100.0, "Start to work on a PDF.")
+        # 获取 PDF 解析配置
         conf = self._param.setups["pdf"]
+        # 设置输出格式
         self.set_output("output_format", conf["output_format"])
 
+        # 根据配置的解析方法选择不同的解析器
         if conf.get("parse_method").lower() == "deepdoc":
+            # 使用 DeepDoc 解析器（RAGFlow 自带的布局识别解析器）
             bboxes = RAGFlowPdfParser().parse_into_bboxes(blob, callback=self.callback)
         elif conf.get("parse_method").lower() == "plain_text":
+            # 使用纯文本解析器（只提取文本，不识别布局）
             lines, _ = PlainParser()(blob)
             bboxes = [{"text": t} for t, _ in lines]
         elif conf.get("parse_method").lower() == "mineru":
+            # 使用 MinerU 解析器（第三方 PDF 解析工具，支持更好的布局识别）
+            # 从环境变量获取 MinerU 可执行文件路径，默认为 "mineru"
             mineru_executable = os.environ.get("MINERU_EXECUTABLE", "mineru")
+            # 从环境变量获取 MinerU API 服务器地址
             mineru_api = os.environ.get("MINERU_APISERVER", "http://host.docker.internal:9987")
+            # 创建 MinerU 解析器实例
             pdf_parser = MinerUParser(mineru_path=mineru_executable, mineru_api=mineru_api)
+            # 检查 MinerU 是否已安装或 API 是否可访问
             ok, reason = pdf_parser.check_installation()
             if not ok:
                 raise RuntimeError(f"MinerU not found or server not accessible: {reason}. Please install it via: pip install -U 'mineru[core]'.")
 
+            # 调用 MinerU 解析 PDF 文件
+            # lines: 解析后的文本块列表，每个元素是 (文本内容, 位置标签)
             lines, _ = pdf_parser.parse_pdf(
-                filepath=name,
-                binary=blob,
-                callback=self.callback,
-                output_dir=os.environ.get("MINERU_OUTPUT_DIR", ""),
-                delete_output=bool(int(os.environ.get("MINERU_DELETE_OUTPUT", 1))),
+                filepath=name,  # PDF 文件路径
+                binary=blob,  # PDF 二进制数据
+                callback=self.callback,  # 进度回调函数
+                output_dir=os.environ.get("MINERU_OUTPUT_DIR", ""),  # MinerU 输出目录（环境变量）
+                delete_output=bool(int(os.environ.get("MINERU_DELETE_OUTPUT", 1))),  # 是否删除输出文件
             )
-            bboxes = []
-            for t, poss in lines:
+            # 将 MinerU 的输出转换为 RAGFlow 的 bboxes 格式
+            bboxes = []  # 文本块列表，每个元素是一个字典，包含文本、图片、位置等信息
+            for t, poss in lines:  # 遍历每个文本块，t 是文本内容，poss 是位置标签字符串
                 box = {
-                    "image": pdf_parser.crop(poss, 1),
-                    "positions": [[pos[0][-1], *pos[1:]] for pos in pdf_parser.extract_positions(poss)],
-                    "text": t,
+                    "image": pdf_parser.crop(poss, 1),  # 根据位置标签裁剪对应的图片区域
+                    "positions": [[pos[0][-1], *pos[1:]] for pos in pdf_parser.extract_positions(poss)],  # 提取位置信息：[[页码, x0, x1, top, bottom], ...]
+                    "text": t,  # 文本内容
                 }
-                bboxes.append(box)
+                bboxes.append(box)  # 添加到文本块列表
         elif conf.get("parse_method").lower() == "tcadp parser":
             # ADP is a document parsing tool using Tencent Cloud API
             table_result_type = conf.get("table_result_type", "1")
@@ -320,30 +358,41 @@ class Parser(ProcessBase):
                         }
                     )
 
+        # 对每个文本块进行分类，标记为图片或表格
         for b in bboxes:
             text_val = b.get("text", "")
-            has_text = isinstance(text_val, str) and text_val.strip()
-            layout = b.get("layout_type")
+            has_text = isinstance(text_val, str) and text_val.strip()  # 检查是否有文本内容
+            layout = b.get("layout_type")  # 获取布局类型（figure/table/title/text 等）
+            # 如果是图片类型（布局类型为 figure，或者有图片但没有文本）
             if layout == "figure" or (b.get("image") and not has_text):
-                b["doc_type_kwd"] = "image"
+                b["doc_type_kwd"] = "image"  # 标记为图片块
+            # 如果是表格类型
             elif layout == "table":
-                b["doc_type_kwd"] = "table"
+                b["doc_type_kwd"] = "table"  # 标记为表格块
 
-        table_ctx = conf.get("table_context_size", 0) or 0
-        image_ctx = conf.get("image_context_size", 0) or 0
+        # 如果配置了表格或图片的上下文大小，为表格和图片添加周围的文本作为上下文
+        table_ctx = conf.get("table_context_size", 0) or 0  # 表格上下文大小（前后各多少行文本）
+        image_ctx = conf.get("image_context_size", 0) or 0  # 图片上下文大小（前后各多少行文本）
         if table_ctx or image_ctx:
+            # attach_media_context 会为表格和图片块添加上下文文本
             bboxes = attach_media_context(bboxes, table_ctx, image_ctx)
 
+        # 根据配置的输出格式，设置输出结果
         if conf.get("output_format") == "json":
+            # JSON 格式：直接输出 bboxes 列表
             self.set_output("json", bboxes)
         if conf.get("output_format") == "markdown":
+            # Markdown 格式：将 bboxes 转换为 Markdown 文本
             mkdn = ""
             for b in bboxes:
+                # 如果是标题，添加 Markdown 标题标记
                 if b.get("layout_type", "") == "title":
                     mkdn += "\n## "
+                # 如果是图片，添加 Markdown 图片标记（base64 编码）
                 if b.get("layout_type", "") == "figure":
                     mkdn += "\n![Image]({})".format(VLM.image2base64(b["image"]))
                     continue
+                # 添加文本内容
                 mkdn += b.get("text", "") + "\n"
             self.set_output("markdown", mkdn)
 
@@ -775,43 +824,64 @@ class Parser(ProcessBase):
             self.set_output("text", content_txt)
 
     async def _invoke(self, **kwargs):
+        """
+        组件的主入口方法，由 Pipeline 调用
+        根据文件类型选择合适的解析方法
+        
+        Args:
+            **kwargs: 上游组件传递的参数，包含文件名、文件对象等信息
+        """
+        # 定义文件类型到解析方法的映射
         function_map = {
-            "pdf": self._pdf,
-            "text&markdown": self._markdown,
-            "spreadsheet": self._spreadsheet,
-            "slides": self._slides,
-            "word": self._word,
-            "image": self._image,
-            "audio": self._audio,
-            "video": self._video,
-            "email": self._email,
+            "pdf": self._pdf,  # PDF 文件
+            "text&markdown": self._markdown,  # 文本和 Markdown 文件
+            "spreadsheet": self._spreadsheet,  # 电子表格（Excel、CSV）
+            "slides": self._slides,  # 演示文稿（PPT、PPTX）
+            "word": self._word,  # Word 文档
+            "image": self._image,  # 图片文件
+            "audio": self._audio,  # 音频文件
+            "video": self._video,  # 视频文件
+            "email": self._email,  # 邮件文件
         }
 
+        # 验证输入参数
         try:
             from_upstream = ParserFromUpstream.model_validate(kwargs)
         except Exception as e:
             self.set_output("_ERROR", f"Input error: {str(e)}")
             return
 
-        name = from_upstream.name
+        name = from_upstream.name  # 获取文件名
+        # 根据是否有文档 ID 决定如何获取文件二进制数据
         if self._canvas._doc_id:
+            # 如果有文档 ID，从文档服务获取存储地址
             b, n = File2DocumentService.get_storage_address(doc_id=self._canvas._doc_id)
-            blob = settings.STORAGE_IMPL.get(b, n)
+            blob = settings.STORAGE_IMPL.get(b, n)  # 从对象存储获取文件
         else:
+            # 否则从文件服务获取文件二进制数据
             blob = FileService.get_blob(from_upstream.file["created_by"], from_upstream.file["id"])
 
+        # 根据文件扩展名匹配对应的解析方法
         done = False
         for p_type, conf in self._param.setups.items():
+            # 检查文件扩展名是否在配置的 suffix 列表中
             if from_upstream.name.split(".")[-1].lower() not in conf.get("suffix", []):
                 continue
+            # 在后台线程中执行对应的解析方法（因为解析可能是同步的）
             await trio.to_thread.run_sync(function_map[p_type], name, blob)
             done = True
             break
 
+        # 如果没有找到匹配的解析方法，抛出异常
         if not done:
             raise Exception("No suitable for file extension: `.%s`" % from_upstream.name.split(".")[-1].lower())
 
+        # 获取解析结果
         outs = self.output()
+        # 异步处理所有 JSON 输出中的图片：将 PIL.Image 对象上传到对象存储，替换为 img_id
         async with trio.open_nursery() as nursery:
             for d in outs.get("json", []):
+                # image2id: 将图片对象转换为存储 ID
+                # partial(settings.STORAGE_IMPL.put, tenant_id=...): 创建上传函数
+                # get_uuid(): 生成唯一 ID
                 nursery.start_soon(image2id, d, partial(settings.STORAGE_IMPL.put, tenant_id=self._canvas._tenant_id), get_uuid())
