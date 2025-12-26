@@ -29,7 +29,7 @@ export http_proxy=""; export https_proxy=""; export no_proxy=""; export HTTP_PRO
 export PYTHONPATH=$(pwd)
 
 export LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu/
-JEMALLOC_PATH=$(pkg-config --variable=libdir jemalloc)/libjemalloc.so
+JEMALLOC_PATH=""
 
 PY=python3
 
@@ -127,3 +127,8 @@ PIDS+=($!)
 
 # Wait for all background processes to finish
 wait
+
+
+
+
+

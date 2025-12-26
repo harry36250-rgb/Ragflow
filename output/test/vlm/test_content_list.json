@@ -1,0 +1,1916 @@
+[
+    {
+        "type": "text",
+        "text": "CATL",
+        "text_level": 1,
+        "bbox": [
+            143,
+            154,
+            540,
+            279
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "宁德时代",
+        "text_level": 1,
+        "bbox": [
+            200,
+            312,
+            454,
+            394
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "电动乘用车版",
+        "bbox": [
+            710,
+            577,
+            928,
+            633
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "动力电池系统用户手册",
+        "text_level": 1,
+        "bbox": [
+            220,
+            741,
+            800,
+            823
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "为了便于您的使用，请仔细阅读并随车妥善保管",
+        "bbox": [
+            289,
+            866,
+            697,
+            901
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "footer",
+        "text": "2020年8月版",
+        "bbox": [
+            776,
+            922,
+            911,
+            955
+        ],
+        "page_idx": 0
+    },
+    {
+        "type": "text",
+        "text": "序言",
+        "text_level": 1,
+        "bbox": [
+            441,
+            79,
+            553,
+            140
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "亲爱的用户：",
+        "bbox": [
+            101,
+            187,
+            212,
+            220
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "您所驾驶的车辆采用的是宁德时代新能源科技股份有限公司（简称CATL）生产的动力电池系统。为了使您更好的了解爱车的电池系统，有效维护您的权益，请仔细阅读《CATL动力电池系统用户手册》，并遵守相关的规定。",
+        "bbox": [
+            60,
+            260,
+            926,
+            441
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "本手册可以帮助您充分用好您的爱车，使您的爱车电池系统始终保持最佳性能和状态。当您爱车的电池系统发生故障，该手册内的检查证明将是本公司确认索赔的依据之一，为了充分享受您的权益，请妥善保管本手册。当您将车辆转卖给他人时，请务必将本手册随车转给新车主，以便新车主继续使用。",
+        "bbox": [
+            60,
+            476,
+            926,
+            727
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "您的满意是我们一直不懈努力和奋斗的目标，希望CATL的电池系统能为您带来高品质的体验。",
+        "bbox": [
+            60,
+            767,
+            919,
+            870
+        ],
+        "page_idx": 1
+    },
+    {
+        "type": "text",
+        "text": "目录",
+        "text_level": 1,
+        "bbox": [
+            444,
+            79,
+            553,
+            140
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "list",
+        "sub_type": "text",
+        "list_items": [
+            "安全须知 01",
+            "紧急事故处理 02",
+            "术语解释 04",
+            "第1章使用说明 04",
+            "1.1 电池温度特性 04",
+            "1.2 出车前检查 04",
+            "1.3充电说明 05",
+            "1.4 维护说明 05",
+            "1.5手动维护开关介绍 07",
+            "1.6手动维护开关操作规范 07",
+            "1.7手动维护开关安全警告 09"
+        ],
+        "bbox": [
+            73,
+            161,
+            911,
+            676
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "第2章质保说明 10",
+        "bbox": [
+            73,
+            692,
+            911,
+            725
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "list",
+        "sub_type": "text",
+        "list_items": [
+            "2.1 质量保修规定 10",
+            "2.2 质量保修期 11",
+            "2.3 质量保修责任豁免范围 12"
+        ],
+        "bbox": [
+            73,
+            741,
+            911,
+            870
+        ],
+        "page_idx": 2
+    },
+    {
+        "type": "text",
+        "text": "安全须知",
+        "text_level": 1,
+        "bbox": [
+            107,
+            79,
+            267,
+            140
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "- 严禁任何时候用双手同时触摸电池箱体的正负极柱。",
+        "bbox": [
+            80,
+            211,
+            292,
+            309
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "image",
+        "img_path": "images/cf65a0322ad506009ef02390524e9584e1df94eaa4cb271949b1d64aaa3abcc8.jpg",
+        "image_caption": [],
+        "image_footnote": [],
+        "bbox": [
+            334,
+            190,
+            516,
+            347
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "- 要求维修人员必须持有安监局颁发的合格电工证和CATL维修授权证书才能进行维修作业。",
+        "bbox": [
+            545,
+            211,
+            767,
+            370
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "image",
+        "img_path": "images/e31dabfd757fefc4c1706097dd317b01136cda327d109260eedd53416f162b43.jpg",
+        "image_caption": [],
+        "image_footnote": [],
+        "bbox": [
+            790,
+            190,
+            965,
+            342
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "$\\bullet$  在操作和维护电池系统时需穿戴绝缘手套，严禁佩戴手表等金属饰品。",
+        "bbox": [
+            78,
+            441,
+            290,
+            600
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "image",
+        "img_path": "images/e11e58ecc8fa06e3dd8874979edcb6f68a253de1d277dc9a824690b82caed4b1.jpg",
+        "image_caption": [],
+        "image_footnote": [],
+        "bbox": [
+            338,
+            438,
+            516,
+            593
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "在清洗车辆时，尽量不要将水枪对准车盘底部连接器部位进行冲洗。",
+        "bbox": [
+            547,
+            441,
+            764,
+            556
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "image",
+        "img_path": "images/8349203e06553f93f83d8d4c643436c33c38eeba38469de5b885680474c5dc3f.jpg",
+        "image_caption": [],
+        "image_footnote": [],
+        "bbox": [
+            785,
+            436,
+            965,
+            582
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "- 严禁人为对电池进行挤压、刺穿、燃烧等破坏电池系统的行为。",
+        "bbox": [
+            80,
+            690,
+            290,
+            807
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "image",
+        "img_path": "images/4feb2621b25a52e13652f7ece97df4d8aad1495222a8357a01bc0ad608d24b08.jpg",
+        "image_caption": [],
+        "image_footnote": [],
+        "bbox": [
+            341,
+            687,
+            516,
+            842
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "- 车辆使用环境应无腐蚀性、爆炸性和破坏绝缘的气体或导电尘埃，并远离热源。",
+        "bbox": [
+            545,
+            690,
+            767,
+            849
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "image",
+        "img_path": "images/fe9409535b458a231b0b5f22008553deb7bf2aad1311d8735c0137a31261c82c.jpg",
+        "image_caption": [],
+        "image_footnote": [],
+        "bbox": [
+            792,
+            687,
+            965,
+            842
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "CATL",
+        "bbox": [
+            823,
+            889,
+            952,
+            934
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "page_number",
+        "text": "1",
+        "bbox": [
+            496,
+            955,
+            509,
+            976
+        ],
+        "page_idx": 3
+    },
+    {
+        "type": "text",
+        "text": "紧急事故处理",
+        "text_level": 1,
+        "bbox": [
+            117,
+            89,
+            369,
+            147
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "场景·交通事故",
+        "text_level": 1,
+        "bbox": [
+            94,
+            176,
+            256,
+            213
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "list",
+        "sub_type": "text",
+        "list_items": [
+            "第一步 车辆停稳后拔出钥匙，疏散乘客。",
+            "第二步 根据国家道路交通安全法相关规定处理交通事故。",
+            "第三步 通知汽车所属品牌经销商，获取进一步车辆处理意见。"
+        ],
+        "bbox": [
+            78,
+            248,
+            540,
+            417
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "image",
+        "img_path": "images/24b2151b8ac4f206be9331a29fd0a86e04b9513ad30e19a1aca540d31df8d646.jpg",
+        "image_caption": [],
+        "image_footnote": [],
+        "bbox": [
+            658,
+            173,
+            957,
+            415
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "场景·火灾",
+        "text_level": 1,
+        "bbox": [
+            94,
+            453,
+            199,
+            490
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "list",
+        "sub_type": "text",
+        "list_items": [
+            "第一步 人员迅速离开车辆，根据现场情况拨打报警电话。",
+            "第二步 保证人身安全的情况下，有条件的进行如下操作："
+        ],
+        "bbox": [
+            80,
+            518,
+            534,
+            607
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "list",
+        "sub_type": "text",
+        "list_items": [
+            "1）如果线束冒烟起火，使用二氧化碳或者干粉灭火器喷射。",
+            "2）如果电池起火，在远距离使用高压水枪灭火。",
+            "3）如果不慎吸入浓烟，请尽快转移并就医"
+        ],
+        "bbox": [
+            138,
+            622,
+            616,
+            748
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "image",
+        "img_path": "images/2f8e52f0cec6c5287b96b26e057c3df63ccb86a3aa1c384016f55c98022cf58f.jpg",
+        "image_caption": [],
+        "image_footnote": [],
+        "bbox": [
+            661,
+            521,
+            962,
+            748
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "第三步 通知汽车所属品牌经销商，获取进一步的车辆处理意见。",
+        "bbox": [
+            84,
+            767,
+            591,
+            800
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "提示",
+        "text_level": 1,
+        "bbox": [
+            143,
+            802,
+            189,
+            830
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "- 如果因充电异常引起的火灾，务必第一时间关闭充电电源，再执行下一步灭火动作。",
+        "bbox": [
+            104,
+            830,
+            812,
+            863
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "footer",
+        "text": "CATL",
+        "bbox": [
+            821,
+            889,
+            950,
+            934
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "page_number",
+        "text": "2",
+        "bbox": [
+            496,
+            931,
+            511,
+            950
+        ],
+        "page_idx": 4
+    },
+    {
+        "type": "text",
+        "text": "紧急事故处理",
+        "text_level": 1,
+        "bbox": [
+            125,
+            145,
+            372,
+            204
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "场景·涉水",
+        "text_level": 1,
+        "bbox": [
+            127,
+            234,
+            230,
+            269
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "车辆在积水路面行驶时，需注意如下：",
+        "bbox": [
+            84,
+            302,
+            398,
+            335
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "table",
+        "img_path": "images/5ad78d3e988340e63676c398af284abbb60c1a0695e75719f67a715bf836e58b.jpg",
+        "table_caption": [],
+        "table_footnote": [],
+        "table_body": "<table><tr><td>深度</td><td>速度</td><td>时间</td></tr><tr><td>≤30Cm</td><td>≤10Km/h</td><td>≤10Min</td></tr></table>",
+        "bbox": [
+            84,
+            345,
+            431,
+            443
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "提示",
+        "text_level": 1,
+        "bbox": [
+            125,
+            460,
+            176,
+            492
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "$\\bullet$  详情以整车手册为准。",
+        "bbox": [
+            91,
+            504,
+            287,
+            537
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "场景·浸泡",
+        "text_level": 1,
+        "bbox": [
+            106,
+            584,
+            210,
+            619
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "车辆因意外情况落水或遭积水浸泡，需注意如下：",
+        "bbox": [
+            84,
+            636,
+            493,
+            669
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "第一步：禁止通电；",
+        "bbox": [
+            148,
+            680,
+            305,
+            711
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "第二步：通知汽车所属品牌经销商。",
+        "bbox": [
+            148,
+            727,
+            431,
+            758
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "提示",
+        "text_level": 1,
+        "bbox": [
+            142,
+            781,
+            187,
+            814
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "- 因天气或特殊原因，车辆被积水浸泡时，禁止车辆通电，否则可能引发安全风险或造成车辆二次损伤！",
+        "bbox": [
+            96,
+            828,
+            910,
+            861
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "image",
+        "img_path": "images/1ccbc2981502750b071f14e43edd3b30770ca927fe5517410663052919990b2d.jpg",
+        "image_caption": [],
+        "image_footnote": [],
+        "bbox": [
+            665,
+            309,
+            960,
+            612
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "footer",
+        "text": "CATL",
+        "bbox": [
+            821,
+            889,
+            950,
+            934
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "page_number",
+        "text": "3",
+        "bbox": [
+            496,
+            955,
+            509,
+            976
+        ],
+        "page_idx": 5
+    },
+    {
+        "type": "text",
+        "text": "术语解释",
+        "text_level": 1,
+        "bbox": [
+            104,
+            89,
+            272,
+            150
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "list",
+        "sub_type": "text",
+        "list_items": [
+            "- SOC: 指电池剩余电量的比例。",
+            "- 久停不用车辆：指连续存储时间超过3个月的车辆。"
+        ],
+        "bbox": [
+            78,
+            173,
+            501,
+            251
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "text",
+        "text": "第1章使用说明",
+        "text_level": 1,
+        "bbox": [
+            109,
+            300,
+            398,
+            359
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "text",
+        "text": "为了保证您的车辆长期可靠的运行，请您仔细阅读并遵守以下使用说明：",
+        "bbox": [
+            76,
+            399,
+            645,
+            431
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "text",
+        "text": "1.1 电池温度特性",
+        "text_level": 1,
+        "bbox": [
+            94,
+            457,
+            250,
+            490
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "list",
+        "sub_type": "text",
+        "list_items": [
+            "- 工作环境温度:  $-30^{\\circ} \\mathrm{C} \\sim 55^{\\circ} \\mathrm{C}$",
+            "- 充电环境温度:  $-20^{\\circ} \\mathrm{C} \\sim 55^{\\circ} \\mathrm{C}$",
+            "- 存储环境温度：  $-40^{\\circ} \\mathrm{C} \\sim 60^{\\circ} \\mathrm{C}$"
+        ],
+        "bbox": [
+            80,
+            509,
+            339,
+            633
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "text",
+        "text": "1.2 出车前检查",
+        "text_level": 1,
+        "bbox": [
+            91,
+            657,
+            230,
+            690
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "list",
+        "sub_type": "text",
+        "list_items": [
+            "$\\bullet$  确认仪表盘无电池系统报警信息。",
+            "- 针对纯电动汽车，长途出车前应检查剩余电量，建议充电至  $50\\% \\sim 100\\%$  电量再出车。"
+        ],
+        "bbox": [
+            78,
+            753,
+            756,
+            840
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "image",
+        "img_path": "images/f4e446a671b44b0110714fae265cb6a24aeff4e42da307213eeeb049855c74ba.jpg",
+        "image_caption": [],
+        "image_footnote": [],
+        "bbox": [
+            781,
+            464,
+            854,
+            661
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "footer",
+        "text": "CATL",
+        "bbox": [
+            823,
+            889,
+            954,
+            936
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "page_number",
+        "text": "4",
+        "bbox": [
+            496,
+            955,
+            509,
+            976
+        ],
+        "page_idx": 6
+    },
+    {
+        "type": "text",
+        "text": "第1章 使用说明",
+        "text_level": 1,
+        "bbox": [
+            101,
+            86,
+            421,
+            147
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "1.3 充电说明",
+        "text_level": 1,
+        "bbox": [
+            83,
+            204,
+            187,
+            237
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "list",
+        "sub_type": "text",
+        "list_items": [
+            "- 使用符合国家标准的充电桩设备。",
+            "- 充电环境应干燥通风，周围无易燃易爆物品。"
+        ],
+        "bbox": [
+            71,
+            258,
+            437,
+            352
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "1.4 维护说明",
+        "text_level": 1,
+        "bbox": [
+            81,
+            368,
+            191,
+            401
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "list",
+        "sub_type": "text",
+        "list_items": [
+            "- 久放车辆电池存放最佳 SOC 区间为： $50\\% \\sim 70\\%$ .",
+            "- 维护周期：3个月/次。",
+            "$\\bullet$  维护方法："
+        ],
+        "bbox": [
+            73,
+            420,
+            477,
+            546
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "list",
+        "sub_type": "text",
+        "list_items": [
+            "1）三元动力电池，通过慢充方式充电至  $50\\% \\mathrm{SOC} \\sim 70\\% \\mathrm{SOC}$  后停放。",
+            "2）磷酸铁锂动力电池,通过慢充方式满充电，然后放电至  $50\\% -70\\% \\mathrm{SOC}$  后停放。"
+        ],
+        "bbox": [
+            70,
+            565,
+            707,
+            647
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "list",
+        "sub_type": "text",
+        "list_items": [
+            "- 车辆停放超过三个月，再次使用前请确认仪表盘有无报警，如有，请联系4S店维护。",
+            "推荐保养周期："
+        ],
+        "bbox": [
+            70,
+            694,
+            751,
+            786
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "私家车：10000Km或1年（首次保养5000km或6个月），以先到者为准。",
+        "bbox": [
+            78,
+            802,
+            674,
+            835
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "营运车：10000Km或1月（首次保养5000km或6个月），以先到者为准，保养内容详见下页。",
+        "bbox": [
+            78,
+            849,
+            836,
+            884
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "提示",
+        "text_level": 1,
+        "bbox": [
+            736,
+            154,
+            777,
+            180
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "- 当环境温度较低时，车辆充电时间会延长属正常的现象。系统为保证电池的最佳性能随温度变化而自动调整充电电流。",
+        "bbox": [
+            718,
+            197,
+            947,
+            349
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "提示",
+        "text_level": 1,
+        "bbox": [
+            736,
+            382,
+            777,
+            408
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "list",
+        "sub_type": "text",
+        "list_items": [
+            "长期停放不用的车辆，请务必定期维护防止造成电池不可逆损失。",
+            "- 实际保养周期可以整车用户手册中为准。"
+        ],
+        "bbox": [
+            718,
+            420,
+            937,
+            556
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "footer",
+        "text": "CATL",
+        "bbox": [
+            821,
+            892,
+            952,
+            938
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "page_number",
+        "text": "5",
+        "bbox": [
+            496,
+            955,
+            508,
+            976
+        ],
+        "page_idx": 7
+    },
+    {
+        "type": "text",
+        "text": "第1章 使用说明",
+        "text_level": 1,
+        "bbox": [
+            91,
+            84,
+            421,
+            147
+        ],
+        "page_idx": 8
+    },
+    {
+        "type": "table",
+        "img_path": "images/ec9a155305a704519897e2d06858941769d67b9abd48961d3dcecf1891ee25f2.jpg",
+        "table_caption": [],
+        "table_footnote": [],
+        "table_body": "<table><tr><td>序号</td><td>类别</td><td>作业项目</td><td>检查方法</td><td>判断标准</td></tr><tr><td>1</td><td rowspan=\"7\">外观检查</td><td>异味检查</td><td>鼻嗅</td><td>电箱周围无刺激,烧焦等异味</td></tr><tr><td>2</td><td>箱体接线/接插件检查</td><td>目检</td><td>箱体高、低压接插件,应连接牢固且表皮无破损</td></tr><tr><td>3</td><td>箱体与车架的紧固</td><td>实测</td><td>复检螺栓扭力,扭力满足质量要求标准。</td></tr><tr><td>4</td><td>下箱体清洁度</td><td>目检</td><td>1)下箱体底部PVC涂层完好;2)无变形、无腐蚀;3)清除灰尘、确保清洁度良好</td></tr><tr><td>5</td><td>维护开关(MSD)</td><td>目检</td><td>维护开关无变形,划痕,开关内部洁净,无污物,是否安装牢固</td></tr><tr><td>6</td><td>检查水冷管进/出水口</td><td>目检</td><td>1)检查水冷管软管与硬管连接处是否有漏液;2)检查水冷管进/出是否有变形</td></tr><tr><td>7</td><td>上箱盖检查</td><td>目检</td><td>1)无裂纹、无鼓包;2)平衡阀牢固,外观良好;3)清洁度良好</td></tr><tr><td>8</td><td rowspan=\"7\">软件诊断</td><td>最高单体温度</td><td rowspan=\"7\">BMS读取</td><td>符合产品技术要求</td></tr><tr><td>9</td><td>电池压差范围</td><td>静态压差应在许可范围内</td></tr><tr><td>10</td><td>电池温差范围</td><td>符合产品技术要求</td></tr><tr><td>11</td><td>系统绝缘阻值</td><td>诊断工具/整车仪表盘有无绝缘报警</td></tr><tr><td>12</td><td>读取进出水口温度</td><td>0°C&lt;温度&lt;70°C</td></tr><tr><td>13</td><td>系统报警</td><td>无电池报警信息</td></tr><tr><td>14</td><td>软件版本</td><td>判断是否为最新版本</td></tr></table>",
+        "bbox": [
+            9,
+            147,
+            986,
+            877
+        ],
+        "page_idx": 8
+    },
+    {
+        "type": "footer",
+        "text": "CATL",
+        "bbox": [
+            823,
+            889,
+            954,
+            938
+        ],
+        "page_idx": 8
+    },
+    {
+        "type": "page_number",
+        "text": "6",
+        "bbox": [
+            498,
+            955,
+            509,
+            978
+        ],
+        "page_idx": 8
+    },
+    {
+        "type": "text",
+        "text": "第1章 使用说明",
+        "text_level": 1,
+        "bbox": [
+            91,
+            84,
+            421,
+            145
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "text",
+        "text": "提示",
+        "text_level": 1,
+        "bbox": [
+            656,
+            56,
+            694,
+            86
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "text",
+        "text": "如您使用的电池包为熔断器设计，可忽略此章节内容",
+        "bbox": [
+            633,
+            100,
+            875,
+            161
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "text",
+        "text": "1.5 维护开关介绍",
+        "text_level": 1,
+        "bbox": [
+            71,
+            161,
+            212,
+            194
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "list",
+        "sub_type": "text",
+        "list_items": [
+            "1. 手动维护开关是一种用于手动切断高压线路，起到安全保护功能的橙色电器元件（见右图）。",
+            "2. 相关人员在对车辆进行检修作业前，必须先断开手动维护开关，检修作业完成后，必须确保手动维护开关安装到位。"
+        ],
+        "bbox": [
+            70,
+            230,
+            766,
+            375
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "image",
+        "img_path": "images/b2c610529a688e7b479e219feea1c4765f3ecf4c4f728e6619baa8517db00649.jpg",
+        "image_caption": [],
+        "image_footnote": [],
+        "bbox": [
+            864,
+            267,
+            955,
+            408
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "text",
+        "text": "1.6 手动维护开关操作规范",
+        "text_level": 1,
+        "bbox": [
+            76,
+            410,
+            305,
+            443
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "text",
+        "text": "1.6.1 拆卸维护开关的步骤",
+        "text_level": 1,
+        "bbox": [
+            76,
+            467,
+            287,
+            497
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "text",
+        "text": "步骤一",
+        "text_level": 1,
+        "bbox": [
+            76,
+            518,
+            133,
+            549
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "text",
+        "text": "如图1所示，用左手拇指向下按压A箭头标记的卡扣位置，同时用右手拇指沿着B箭头所示的方向掰开维护开关的拉手至图2中所示的角度。",
+        "bbox": [
+            163,
+            523,
+            880,
+            605
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "text",
+        "text": "步骤二",
+        "text_level": 1,
+        "bbox": [
+            76,
+            622,
+            133,
+            652
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "text",
+        "text": "如图2所示，继续用左手拇指向下按压A箭头标记的位置，同时用右手拇指沿着B箭头所示的方向继续掰开维护",
+        "bbox": [
+            163,
+            626,
+            885,
+            708
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "text",
+        "text": "步骤三",
+        "text_level": 1,
+        "bbox": [
+            76,
+            723,
+            133,
+            755
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "text",
+        "text": "如图 4 所示, 用右手握住维护开关上盖的拉手, 沿着 A 箭头所示的方向轻轻拉出上盖, 完成维护开关的拆卸。① ② ③ ④",
+        "bbox": [
+            163,
+            737,
+            877,
+            819
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "image",
+        "img_path": "images/572ccd7a642e079d48762f5efb13b87b59cd73b6d590329cc91bcc082b5cad5d.jpg",
+        "image_caption": [],
+        "image_footnote": [],
+        "bbox": [
+            259,
+            786,
+            790,
+            943
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "footer",
+        "text": "CATL",
+        "bbox": [
+            823,
+            889,
+            952,
+            936
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "page_number",
+        "text": "7",
+        "bbox": [
+            496,
+            955,
+            508,
+            974
+        ],
+        "page_idx": 9
+    },
+    {
+        "type": "text",
+        "text": "第1章 使用说明",
+        "text_level": 1,
+        "bbox": [
+            91,
+            84,
+            421,
+            147
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "text",
+        "text": "提示",
+        "text_level": 1,
+        "bbox": [
+            627,
+            58,
+            669,
+            89
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "text",
+        "text": "如您使用的电池包为熔断器设计，可",
+        "bbox": [
+            606,
+            103,
+            846,
+            131
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "text",
+        "text": "忽略此章节内容",
+        "bbox": [
+            602,
+            136,
+            707,
+            164
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "text",
+        "text": "1.6手动维护开关操作规范",
+        "text_level": 1,
+        "bbox": [
+            75,
+            166,
+            305,
+            204
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "text",
+        "text": "1.6.2 安装维护开关的步骤",
+        "text_level": 1,
+        "bbox": [
+            75,
+            223,
+            287,
+            255
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "text",
+        "text": "步骤一",
+        "text_level": 1,
+        "bbox": [
+            75,
+            274,
+            133,
+            307
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "text",
+        "text": "如图1所示，用右手握住维护开关上盖的拉手，使拉手与维护开关成90度夹角，沿着A箭头所示的方向将上盖轻轻插入底座。",
+        "bbox": [
+            163,
+            288,
+            885,
+            373
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "text",
+        "text": "步骤二",
+        "text_level": 1,
+        "bbox": [
+            75,
+            377,
+            133,
+            410
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "text",
+        "text": "如图2所示，使用左右手的拇指沿着B箭头所示的方向缓慢推动维护开关的拉手，直到听见“咔嚓”声后停止，如图3所示，此时维护开关安装到位。",
+        "bbox": [
+            165,
+            394,
+            879,
+            476
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "text",
+        "text": "步骤三",
+        "text_level": 1,
+        "bbox": [
+            75,
+            481,
+            133,
+            511
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "text",
+        "text": "如图4所示，用右手握住维护开关的上盖沿着A箭头所示的方向拉拨，以此确认维护开关的上盖是否安装到位。",
+        "bbox": [
+            163,
+            497,
+            875,
+            579
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "image",
+        "img_path": "images/b51ca814ae033ff30b84f14bcb838ace651c4403d95ad620b607b4cbbdeaf98f.jpg",
+        "image_caption": [],
+        "image_footnote": [],
+        "bbox": [
+            155,
+            647,
+            821,
+            852
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "footer",
+        "text": "CATL",
+        "bbox": [
+            823,
+            889,
+            955,
+            938
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "page_number",
+        "text": "8",
+        "bbox": [
+            496,
+            955,
+            509,
+            976
+        ],
+        "page_idx": 10
+    },
+    {
+        "type": "text",
+        "text": "第1章 使用说明",
+        "text_level": 1,
+        "bbox": [
+            91,
+            84,
+            421,
+            147
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "text",
+        "text": "1.7 手动维护开关安全警告",
+        "text_level": 1,
+        "bbox": [
+            80,
+            208,
+            312,
+            241
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "list",
+        "sub_type": "text",
+        "list_items": [
+            "1、在整车上“ON档”状态时，严禁插拔维护开关和电箱上的任何接插件。",
+            "2、车辆在处于充电状态时，不得将维护开关和电池箱体上的接插件拔出。",
+            "3、严禁在维护开关插孔内有液体和固体颗粒的情况下插入维修开关。",
+            "4、严禁使用其他器件和材料代替维护开关。",
+            "5、维护开关在未装时，严禁用手或其他物品触碰维护开关底座内部裸露金属。",
+            "6、严禁使用重物挤压或敲打维护开关，当维护开关任何部分出现较大凹陷、裂纹时，需立即停止使用车辆，与厂家或授权服务商联系。"
+        ],
+        "bbox": [
+            52,
+            269,
+            895,
+            631
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "footer",
+        "text": "CATL",
+        "bbox": [
+            823,
+            889,
+            952,
+            938
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "page_number",
+        "text": "9",
+        "bbox": [
+            498,
+            953,
+            513,
+            978
+        ],
+        "page_idx": 11
+    },
+    {
+        "type": "text",
+        "text": "第2章 质保说明",
+        "text_level": 1,
+        "bbox": [
+            91,
+            84,
+            421,
+            147
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "text",
+        "text": "2.1 质量保修规定",
+        "text_level": 1,
+        "bbox": [
+            84,
+            190,
+            241,
+            223
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "list",
+        "sub_type": "text",
+        "list_items": [
+            "1、本手册的所有规定仅适用于在中国大陆（不含港、澳、台）销售并使用的CATL动力电池系统。",
+            "2、在质量保修期内，CATL对其认可的量产车型因电池系统的质量缺陷所引起的故障，可提供质量保修服务。",
+            "3、对于超过质量保修期的产品，CATL提供有偿服务。",
+            "4、任何不属于CATL责任的故障，均不在质量保修的责任范围内。",
+            "5、在质量保修期内，由CATL免费更换下来的故障件产权归CATL所有。",
+            "6、除中国大陆法律的强制性规定外，本手册规定提供的质量保修服务是本公司对客户承担的唯一责任。"
+        ],
+        "bbox": [
+            104,
+            274,
+            890,
+            603
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "footer",
+        "text": "CATL",
+        "bbox": [
+            823,
+            889,
+            955,
+            938
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "page_number",
+        "text": "10",
+        "bbox": [
+            495,
+            955,
+            514,
+            978
+        ],
+        "page_idx": 12
+    },
+    {
+        "type": "text",
+        "text": "第2章 质保说明",
+        "text_level": 1,
+        "bbox": [
+            91,
+            84,
+            431,
+            147
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "text",
+        "text": "2.2 质量保修期",
+        "text_level": 1,
+        "bbox": [
+            66,
+            166,
+            196,
+            201
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "text",
+        "text": "2.2.1 电池系统零部件的质量保修期",
+        "text_level": 1,
+        "bbox": [
+            63,
+            220,
+            352,
+            255
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "list",
+        "sub_type": "text",
+        "list_items": [
+            "1、质量保修期的起始：按电池厂家与汽车厂家协约定的起始日为准。",
+            "2、模组、BMU，CSC等主要部件的质量保修期：参见整车公司关于本产品的质量保修期规定。",
+            "3、电池系统零部件在质量保修期内免费维修，维修更换的零部件质保期为原损坏部件的剩余质保期限。",
+            "4、易损件质量保修期清单参见表一。"
+        ],
+        "bbox": [
+            58,
+            274,
+            606,
+            525
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "text",
+        "text": "2.2.2售后市场销售配件的质量保修期",
+        "text_level": 1,
+        "bbox": [
+            62,
+            539,
+            367,
+            572
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "list",
+        "sub_type": "text",
+        "list_items": [
+            "1、销售配件的定义：客户向CATL指定配件销售商采购的零部件。",
+            "2、质量保修期的起始：以“CATL售后服务部或服务代理商”开具的配件发票上的日期开始计算。",
+            "3、销售配件在质量保修期内免费维修或更换后的质量保修期等于原销售配件规定的质保期的剩余期限。",
+            "4、电池箱总成的质保期等于整车规定质保期的剩余期限。",
+            "5、销售配件的质量保修期参见表二。"
+        ],
+        "bbox": [
+            58,
+            591,
+            607,
+            887
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "table",
+        "img_path": "images/6c494975229698089d16ca6e2febb8199fb290e75a0cc1db4a5ca1f3cd99ca9b.jpg",
+        "table_caption": [
+            "表一：易损件质量保修期清单"
+        ],
+        "table_footnote": [],
+        "table_body": "<table><tr><td>序号</td><td>名称</td><td>质保期</td></tr><tr><td>1</td><td>继电器</td><td>随整车手册中该类部件的规定</td></tr><tr><td>2</td><td>手动维护开关</td><td>随整车手册中该类部件的规定</td></tr><tr><td>3</td><td>保险丝</td><td>随整车手册中该类部件的规定</td></tr></table>",
+        "bbox": [
+            625,
+            326,
+            968,
+            429
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "table",
+        "img_path": "images/5f51292d48bb7c09391971a2586715f308726c3bcec4752441535c3305b72464.jpg",
+        "table_caption": [
+            "表二：销售配件质量保修期清单"
+        ],
+        "table_footnote": [],
+        "table_body": "<table><tr><td>序号</td><td>名称</td><td>质保期</td></tr><tr><td>1</td><td>继电器</td><td>随整车手册中该类部件的规定</td></tr><tr><td>2</td><td>手动维护开关</td><td>随整车手册中该类部件的规定</td></tr><tr><td>3</td><td>保险丝</td><td>随整车手册中该类部件的规定</td></tr></table>",
+        "bbox": [
+            625,
+            619,
+            968,
+            723
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "footer",
+        "text": "CATL",
+        "bbox": [
+            823,
+            894,
+            952,
+            938
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "page_number",
+        "text": "11",
+        "bbox": [
+            495,
+            955,
+            514,
+            976
+        ],
+        "page_idx": 13
+    },
+    {
+        "type": "text",
+        "text": "第2章 质保说明",
+        "text_level": 1,
+        "bbox": [
+            101,
+            84,
+            431,
+            147
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "text",
+        "text": "2.3 质量保修责任豁免范围",
+        "text_level": 1,
+        "bbox": [
+            96,
+            152,
+            331,
+            190
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "text",
+        "text": "CATL对如下情况不提供质量保修服务：",
+        "text_level": 1,
+        "bbox": [
+            76,
+            213,
+            393,
+            244
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "list",
+        "sub_type": "text",
+        "list_items": [
+            "1、未按本手册的规定进行正确使用、保养、检查产品而导致的损坏。",
+            "2、手动维护开关（MSD）未安装到位而造成的损坏。",
+            "3、车辆长时间存放超过3个月，未按本手册第1.4条的要求进行定期保养而导致的各类故障情形。",
+            "4、使用不符合国家标准的充电设备或充电操作不规范而导致的损坏。",
+            "5、对电池系统进行人为破坏的。",
+            "6、电池系统发生超过技术协议约定的密封等级标准的泡水、撞击、交通事故等事件的。",
+            "7、未经CATL售后服务部、授权服务站允许，对电池系统私自改装、拆装和调整。",
+            "8、电池系统发生故障时，客户未经CATL售后服务部或服务站允许私自对故障进行处理而导致的损坏。",
+            "9、客户因无法使用车辆所造成的关联或间接损失，如时间、停车、差旅费、个人财物或商业财产损失、收益损失、精神损失等，但依法判定由本公司承担的情况除外。",
+            "10、因不可抗力如地震、台风、洪水、化学污染、雷击、交通事故、冰雹、泥沙、飞石、火灾、政治灾难，或人为的故意损坏等因素导致的损坏，以及基于这些损坏而引起的二次赔偿，双方均予以免责。"
+        ],
+        "bbox": [
+            76,
+            262,
+            911,
+            711
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "text",
+        "text": "CATL在法律许可下拥有对本手册的最终解释权，保留修改本手册的权利，如有变动恕不另行通知。",
+        "bbox": [
+            143,
+            779,
+            857,
+            812
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "footer",
+        "text": "CATL",
+        "bbox": [
+            825,
+            896,
+            955,
+            941
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "page_number",
+        "text": "12",
+        "bbox": [
+            496,
+            955,
+            516,
+            976
+        ],
+        "page_idx": 14
+    },
+    {
+        "type": "text",
+        "text": "CATL 宁德时代",
+        "text_level": 1,
+        "bbox": [
+            176,
+            366,
+            776,
+            462
+        ],
+        "page_idx": 15
+    },
+    {
+        "type": "image",
+        "img_path": "images/b472b3e4182468fca2a9183b73d17b7747eaa8ca4ed87b56a56d92d21a8086eb.jpg",
+        "image_caption": [],
+        "image_footnote": [],
+        "bbox": [
+            40,
+            746,
+            145,
+            877
+        ],
+        "page_idx": 15
+    },
+    {
+        "type": "text",
+        "text": "宁德时代新能源科技股份有限公司",
+        "bbox": [
+            171,
+            744,
+            589,
+            786
+        ],
+        "page_idx": 15
+    },
+    {
+        "type": "text",
+        "text": "Contemporary Amperex Technology Co., Limited",
+        "bbox": [
+            171,
+            788,
+            589,
+            821
+        ],
+        "page_idx": 15
+    },
+    {
+        "type": "text",
+        "text": "地址：福建省宁德市漳湾镇新港路2号 邮编：352100",
+        "bbox": [
+            168,
+            823,
+            575,
+            849
+        ],
+        "page_idx": 15
+    },
+    {
+        "type": "text",
+        "text": "网址：www.catl.com",
+        "bbox": [
+            168,
+            856,
+            331,
+            880
+        ],
+        "page_idx": 15
+    },
+    {
+        "type": "image",
+        "img_path": "images/8dcd10c98edd6313a12926c736251c2a4b84c4b93ac6ccd59b30bc58de2d5cb1.jpg",
+        "image_caption": [],
+        "image_footnote": [],
+        "bbox": [
+            625,
+            774,
+            681,
+            852
+        ],
+        "page_idx": 15
+    },
+    {
+        "type": "text",
+        "text": "24小时免费客服热线400-918-0889",
+        "bbox": [
+            718,
+            762,
+            933,
+            863
+        ],
+        "page_idx": 15
+    }
+]

@@ -1,0 +1,674 @@
+@startuml MinerU_RAGFlow_Complete_Flow
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam sequenceMessageAlign center
+skinparam roundcorner 10
+
+title MinerU + RAGFlow 完整处理流程（从上传到前端展示）
+
+actor User as 用户
+participant "Frontend" as Frontend
+participant "Document API" as DocAPI
+participant "File Service" as FileService
+participant "Document Service" as DocService
+participant "Task Service" as TaskService
+participant "Redis Queue" as Redis
+participant "Task Executor" as Executor
+participant "Pipeline" as Pipeline
+participant "Parser Component" as Parser
+participant "MinerUParser" as MinerU
+participant "MinerU Server" as MinerUServer
+participant "MinIO/S3" as Storage
+participant "Splitter Component" as Splitter
+participant "Embedding Model" as Embedding
+participant "Elasticsearch/\nInfinity" as VectorDB
+participant "Search API" as SearchAPI
+
+== 一、文件上传与任务调度 ==
+
+用户 -> Frontend: 上传 PDF 文件
+activate Frontend
+Frontend -> DocAPI: POST /api/document/upload
+activate DocAPI
+note right of DocAPI
+  @manager.route("/upload", methods=["POST"])
+  async def upload()
+end note
+DocAPI -> FileService: FileService.upload_document(kb, file_objs, user_id)
+activate FileService
+note right of FileService
+  def upload_document(self, kb, file_objs, user_id, src="local", parent_path=None)
+  - settings.STORAGE_IMPL.put(kb.id, location, blob)
+  - DocumentService.insert(doc)
+end note
+FileService -> Storage: settings.STORAGE_IMPL.put(kb.id, location, blob)
+activate Storage
+Storage --> FileService: 文件存储成功
+deactivate Storage
+FileService -> DocService: DocumentService.insert(doc)
+activate DocService
+DocService --> FileService: 返回 doc_id
+deactivate DocService
+FileService --> DocAPI: 返回 files [(doc, blob), ...]
+deactivate FileService
+DocAPI --> Frontend: get_json_result(data=files)
+deactivate DocAPI
+Frontend --> 用户: 显示上传成功
+deactivate Frontend
+
+DocAPI -> DocService: DocumentService.get_chunking_config(doc_id)
+activate DocService
+note right of DocService
+  def get_chunking_config(cls, doc_id)
+  返回: {parser_id, parser_config, tenant_id, kb_id, ...}
+end note
+DocService --> DocAPI: 返回 chunking_config
+deactivate DocService
+
+DocAPI -> TaskService: TaskService.queue_tasks(doc, bucket, name, priority)
+activate TaskService
+note right of TaskService
+  def queue_tasks(doc, bucket, name, priority)
+  - DocumentService.get_chunking_config(doc["id"])
+  - 生成 parse_task_array
+  - 计算 task["digest"] = xxhash.xxh64(...).hexdigest()
+  - bulk_insert_into_db(Task, parse_task_array)
+  - REDIS_CONN.queue_product(queue_name, message)
+end note
+TaskService -> DocService: DocumentService.get_chunking_config(doc["id"])
+activate DocService
+DocService --> TaskService: 返回 chunking_config
+deactivate DocService
+TaskService -> TaskService: 生成 parse_task_array (分页任务)
+TaskService -> TaskService: 计算 task["digest"] = xxhash.xxh64(...).hexdigest()
+TaskService -> TaskService: bulk_insert_into_db(Task, parse_task_array)
+TaskService -> Redis: REDIS_CONN.queue_product(queue_name, unfinished_task)
+activate Redis
+note right of Redis
+  settings.get_svr_queue_name(priority)
+  message = unfinished_task
+end note
+Redis --> TaskService: 任务入队成功
+deactivate Redis
+TaskService --> DocAPI: 任务创建成功
+deactivate TaskService
+
+== 二、Task Executor 拉取任务并启动 Pipeline ==
+
+Executor -> Redis: REDIS_CONN.queue_consumer(queue_name)
+activate Executor
+activate Redis
+note right of Executor
+  rag/svr/task_executor.py
+  do_handle_task() / run_dataflow()
+end note
+Redis --> Executor: 返回任务消息 task
+deactivate Redis
+Executor -> Executor: run_dataflow(task)
+note right of Executor
+  async def run_dataflow(task: dict)
+  - 根据 DSL 创建 Pipeline
+  - chunks = await pipeline.run(file=task["file"])
+end note
+Executor -> Pipeline: Pipeline(dsl, tenant_id=task_tenant_id, doc_id=task_doc_id, task_id=task_id, flow_id=task["flow_id"])
+activate Pipeline
+note right of Pipeline
+  rag/flow/pipeline.py
+  class Pipeline(Graph)
+  def __init__(self, dsl, tenant_id=None, doc_id=None, task_id=None, flow_id=None)
+end note
+Pipeline -> Pipeline: 初始化组件 (Parser, Splitter, ...)
+Pipeline --> Executor: Pipeline 创建完成
+deactivate Pipeline
+
+== 三、Parser 组件 - MinerU 解析阶段 ==
+
+Executor -> Pipeline: await pipeline.run(file=task["file"])
+activate Pipeline
+note right of Pipeline
+  async def run(self, **kwargs)
+  - 按 path 顺序调用组件
+  - await cpn_obj.invoke(**last_cpn.output())
+end note
+Pipeline -> Parser: await cpn_obj.invoke(**kwargs)
+activate Parser
+note right of Parser
+  rag/flow/parser/parser.py
+  async def _invoke(self, **kwargs)
+  - 调用 _pdf(name, blob) 方法
+end note
+Parser -> Parser: _pdf(name, blob)
+note right of Parser
+  def _pdf(self, name, blob)
+  - conf.get("parse_method").lower() == "mineru"
+  - pdf_parser = MinerUParser(mineru_path, mineru_api)
+end note
+Parser -> MinerU: MinerUParser(mineru_path=mineru_executable, mineru_api=mineru_api)
+activate MinerU
+Parser -> MinerU: pdf_parser.check_installation()
+note right of MinerU
+  deepdoc/parser/mineru_parser.py
+  def check_installation(self)
+  - 检查 MinerU 可执行文件和服务
+end note
+MinerU -> MinerUServer: 检查 MinerU 服务可用性
+activate MinerUServer
+MinerUServer --> MinerU: 服务状态
+deactivate MinerUServer
+MinerU --> Parser: 返回 (ok, reason)
+deactivate MinerU
+
+Parser -> MinerU: pdf_parser.parse_pdf(filepath=name, binary=blob, callback=self.callback, output_dir=..., delete_output=...)
+activate MinerU
+note right of MinerU
+  def parse_pdf(self, filepath, binary, callback, output_dir, delete_output)
+  - 准备临时目录
+  - 保存 PDF 到临时文件
+  - self.__images__(pdf) - 提取页面图片
+  - self._run_mineru(pdf, out_dir)
+  - self._read_output() - 读取处理结果
+  - self._transfer_to_sections(outputs)
+end note
+MinerU -> MinerU: 准备临时目录
+MinerU -> MinerU: 保存 PDF 到临时文件
+MinerU -> MinerU: self.__images__(pdf) - 提取页面图片
+MinerU -> MinerUServer: self._run_mineru(pdf, out_dir)
+activate MinerUServer
+note right of MinerUServer
+  MinerU 服务器处理：
+  1. 布局识别
+  2. 文本提取
+  3. 图片提取
+  4. 表格识别
+  5. 内容分类
+  输出: outputs[]
+end note
+MinerUServer --> MinerU: 处理完成，输出到目录
+deactivate MinerUServer
+MinerU -> MinerU: self._read_output(output_dir, file_stem, method, backend)
+note right of MinerU
+  def _read_output(self, output_dir, file_stem, method, backend)
+  - 查找 JSON 文件: {file_stem}_content_list.json
+  - 读取并解析 JSON
+  - 返回 outputs[] 列表
+  每个 output 包含:
+  {
+    "type": "text" | "table" | "image" | "equation" | "code" | "list" | "discarded",
+    "bbox": [x0, top, x1, bottom],
+    "page_idx": 0,
+    ... (其他字段根据类型不同)
+  }
+end note
+MinerU -> MinerU: self._transfer_to_sections(outputs, parse_method)
+note right of MinerU
+  def _transfer_to_sections(self, outputs, parse_method)
+  
+  MinerU 通过 output["type"] 字段区分内容类型:
+  
+  for output in outputs:
+      match output["type"]:
+          case "text" (TEXT):
+              section = output["text"]
+              # 直接使用文本内容
+          
+          case "table" (TABLE):
+              section = (
+                  output.get("table_body", "") +
+                  "\n".join(output.get("table_caption", [])) +
+                  "\n".join(output.get("table_footnote", []))
+              )
+              # 组合表格主体、标题和脚注
+          
+          case "image" (IMAGE):
+              section = (
+                  "".join(output.get("image_caption", [])) +
+                  "\n" +
+                  "".join(output.get("image_footnote", []))
+              )
+              # 组合图片标题和脚注
+              # 注意: img_path 字段包含图片文件路径
+          
+          case "equation" (EQUATION):
+              section = output["text"]
+              # 公式的文本表示
+          
+          case "code" (CODE):
+              section = (
+                  output["code_body"] +
+                  "\n".join(output.get("code_caption", []))
+              )
+              # 组合代码主体和标题
+          
+          case "list" (LIST):
+              section = "\n".join(output.get("list_items", []))
+              # 组合列表项
+          
+          case "discarded" (DISCARDED):
+              pass  # 跳过丢弃的内容
+      
+      # 为每个 output 生成位置标签
+      position_tag = self._line_tag(output)
+      note right of MinerU
+        def _line_tag(self, bx):
+          - 从 output 提取:
+            * page_idx: 页码（从 0 开始 → 转换为从 1 开始）
+            * bbox: 边界框坐标 (x0, top, x1, bottom)
+              MinerU 使用 0-1000 的相对坐标
+          - 如果已加载页面图片，转换为绝对像素坐标:
+            x0 = (x0 / 1000.0) * page_width
+            x1 = (x1 / 1000.0) * page_width
+            top = (top / 1000.0) * page_height
+            bottom = (bottom / 1000.0) * page_height
+          - 生成位置标签字符串:
+            格式: "@@{page}\t{x0}\t{x1}\t{top}\t{bottom}##"
+            示例: "@@1\t143.0\t540.0\t154.0\t279.0##"
+      end note
+      
+      # 根据 parse_method 决定输出格式
+      if parse_method == "manual":
+          sections.append((section, output["type"], position_tag))
+      elif parse_method == "paper":
+          sections.append((section + position_tag, output["type"]))
+      else:
+          sections.append((section, position_tag))
+  
+  返回: [(section, position_tag), ...]
+end note
+MinerU --> Parser: 返回 lines [(text, position_tag), ...]
+note right of MinerU
+  返回格式示例:
+  [
+    ("这是文本内容", "@@1\t143.0\t540.0\t154.0\t279.0##"),
+    ("图片标题：黑色电子设备\n图片脚注", "@@4\t792.0\t967.0\t192.0\t342.0##"),
+    ("| 列1 | 列2 |\n表格标题", "@@2\t100.0\t500.0\t200.0\t400.0##"),
+    ...
+  ]
+end note
+deactivate MinerU
+
+== 四、Section → Bbox 转换 ==
+
+Parser -> Parser: 遍历 lines，生成 bboxes
+note right of Parser
+  for t, poss in lines:
+    box = {
+        "image": pdf_parser.crop(poss, 1),
+        "positions": [[pos[0][-1], *pos[1:]] for pos in pdf_parser.extract_positions(poss)],
+        "text": t
+    }
+    bboxes.append(box)
+end note
+loop 对每个 line (t, poss)
+    Parser -> MinerU: pdf_parser.crop(poss, 1)
+    activate MinerU
+    note right of MinerU
+      def crop(self, text, ZM=1, need_position=False)
+      - extract_positions(text) 提取位置
+      - 从 page_images 裁剪图片
+      - 返回 PIL.Image
+    end note
+    MinerU --> Parser: 返回 image (PIL.Image)
+    deactivate MinerU
+    Parser -> MinerU: pdf_parser.extract_positions(poss)
+    activate MinerU
+    note right of MinerU
+      @staticmethod
+      def extract_positions(txt: str)
+      - re.findall(r"@@[0-9-]+\t[0-9.\t]+##", txt)
+      - 返回: [(pns, left, right, top, bottom), ...]
+    end note
+    MinerU --> Parser: 返回 positions [[page, x0, x1, top, bottom], ...]
+    deactivate MinerU
+    Parser -> Parser: 组装 bbox {"text": t, "image": image, "positions": positions}
+end
+
+Parser -> Parser: 分类处理 (doc_type_kwd)
+note right of Parser
+  for b in bboxes:
+    text_val = b.get("text", "")
+    has_text = isinstance(text_val, str) and text_val.strip()
+    layout = b.get("layout_type")
+    if layout == "figure" or (b.get("image") and not has_text):
+        b["doc_type_kwd"] = "image"
+    elif layout == "table":
+        b["doc_type_kwd"] = "table"
+end note
+loop 对每个 bbox
+    alt layout == "figure" OR (有image AND 无text)
+        Parser -> Parser: b["doc_type_kwd"] = "image"
+    else layout == "table"
+        Parser -> Parser: b["doc_type_kwd"] = "table"
+    end
+end
+
+Parser -> Parser: attach_media_context(bboxes, table_ctx, image_ctx)
+note right of Parser
+  rag/nlp/__init__.py
+  def attach_media_context(bboxes, table_ctx, image_ctx)
+  - 为表格和图片块添加上下文文本
+end note
+Parser -> Parser: self.set_output("json", bboxes)
+
+== 五、Bbox → JSON (图片上传) ==
+
+Parser -> Parser: _invoke() 末尾处理图片上传
+note right of Parser
+  outs = self.output()
+  async with trio.open_nursery() as nursery:
+      for d in outs.get("json", []):
+          nursery.start_soon(image2id, d, partial(settings.STORAGE_IMPL.put, tenant_id=self._canvas._tenant_id), get_uuid())
+end note
+loop 对每个 bbox in outs.get("json", [])
+    alt d.get("image") 不为 None
+        Parser -> Storage: await image2id(d, storage_put_func, objname, bucket="imagetemps")
+        activate Storage
+        note right of Storage
+          rag/utils/base64_image.py
+          async def image2id(d: dict, storage_put_func, objname, bucket="imagetemps")
+          - 将 PIL.Image 转换为 JPEG 字节流
+          - await storage_put_func(bucket=bucket, fnm=objname, binary=output_buffer.getvalue())
+          - d["img_id"] = f"{bucket}-{objname}"
+          - del d["image"]
+        end note
+        Storage -> Storage: settings.STORAGE_IMPL.put(bucket="imagetemps", fnm=objname, binary=image_bytes)
+        Storage --> Parser: d["img_id"] = "imagetemps-uuid"
+        deactivate Storage
+    end
+end
+Parser --> Pipeline: 返回 json_result (包含 img_id)
+deactivate Parser
+
+== 六、Splitter 组件 - Section 提取 ==
+
+Pipeline -> Splitter: await cpn_obj.invoke(**last_cpn.output())
+activate Splitter
+note right of Splitter
+  rag/flow/splitter/splitter.py
+  async def _invoke(self, **kwargs)
+  - from_upstream.json_result
+end note
+Splitter -> Splitter: 从 json_result 提取 sections
+note right of Splitter
+  sections, section_images = [], []
+  for o in from_upstream.json_result or []:
+      sections.append((o.get("text", ""), o.get("position_tag", "")))
+      section_images.append(id2image(o.get("img_id"), partial(settings.STORAGE_IMPL.get, tenant_id=self._canvas._tenant_id)))
+end note
+loop 对每个 o in from_upstream.json_result
+    Splitter -> Splitter: sections.append((o.get("text", ""), o.get("position_tag", "")))
+    alt o.get("img_id") 不为 None
+        Splitter -> Storage: id2image(img_id, storage_get_func)
+        activate Storage
+        note right of Storage
+          rag/utils/base64_image.py
+          def id2image(img_id, storage_get_func)
+          - bucket, filename = img_id.split("-", 1)
+          - image_data = storage_get_func(bucket=bucket, fnm=filename)
+          - 返回 PIL.Image.open(BytesIO(image_data))
+        end note
+        Storage -> Storage: settings.STORAGE_IMPL.get(bucket, filename)
+        Storage --> Splitter: 返回 PIL.Image
+        deactivate Storage
+        Splitter -> Splitter: section_images.append(image)
+    else
+        Splitter -> Splitter: section_images.append(None)
+    end
+end
+
+== 七、Section → Chunk 合并 ==
+
+Splitter -> Splitter: naive_merge_with_images(sections, section_images, chunk_token_size, deli, overlapped_percent)
+note right of Splitter
+  rag/nlp/__init__.py
+  def naive_merge_with_images(texts, images, chunk_token_num=128, delimiter="\n。；！？", overlapped_percent=0)
+  合并规则：
+  - 计算 token 数: num_tokens_from_string(text)
+  - 如果当前 chunk 为空 OR
+    tk_nums[-1] > chunk_token_num * (100 - overlapped_percent)/100
+    则创建新 chunk
+  - 否则合并到当前 chunk
+  - 图片使用 concat_img() 垂直拼接
+end note
+
+loop 对每个 (text, image) in zip(sections, section_images)
+    Splitter -> Splitter: num_tokens_from_string(text_str)
+    Splitter -> Splitter: 判断是否需要创建新 chunk
+    alt cks[-1] == "" OR tk_nums[-1] > chunk_token_num * (100 - overlapped_percent)/100
+        Splitter -> Splitter: cks.append("\n" + text_str + text_pos)
+        Splitter -> Splitter: result_images.append(image)
+        Splitter -> Splitter: tk_nums.append(tnum)
+    else 合并到当前 chunk
+        Splitter -> Splitter: cks[-1] += "\n" + text_str + text_pos
+        alt result_images[-1] 为 None
+            Splitter -> Splitter: result_images[-1] = image
+        else
+            Splitter -> Splitter: result_images[-1] = concat_img(result_images[-1], image)
+        end
+        Splitter -> Splitter: tk_nums[-1] += tnum
+    end
+end
+
+Splitter -> Splitter: 生成最终 chunks
+note right of Splitter
+  cks = [
+      {
+          "text": RAGFlowPdfParser.remove_tag(c),
+          "image": img,
+          "positions": [[pos[0][-1]+1, *pos[1:]] for pos in RAGFlowPdfParser.extract_positions(c)]
+      }
+      for c, img in zip(chunks, images) if c.strip()
+  ]
+end note
+
+== 八、Chunk 图片上传 ==
+
+Splitter -> Splitter: 对最终 chunks 再次上传图片
+note right of Splitter
+  async with trio.open_nursery() as nursery:
+      for d in cks:
+          nursery.start_soon(image2id, d, partial(settings.STORAGE_IMPL.put, tenant_id=self._canvas._tenant_id), get_uuid())
+end note
+loop 对每个 d in cks
+    alt d.get("image") 不为 None
+        Splitter -> Storage: await image2id(d, storage_put_func, objname, bucket="imagetemps")
+        activate Storage
+        Storage -> Storage: settings.STORAGE_IMPL.put(bucket="imagetemps", fnm=objname, binary=image_bytes)
+        Storage --> Splitter: d["img_id"] = "imagetemps-uuid"
+        deactivate Storage
+        Splitter -> Splitter: del d["image"]
+    end
+end
+Splitter -> Splitter: self.set_output("chunks", cks)
+Splitter --> Pipeline: 返回 chunks
+deactivate Splitter
+
+== 九、Embedding 生成 ==
+
+Pipeline -> Executor: chunks = await pipeline.run(file=task["file"])
+deactivate Pipeline
+note right of Executor
+  chunks = copy.deepcopy(chunks["chunks"])
+  如果 chunks 中没有向量，则生成
+end note
+Executor -> Embedding: embedding_model.encode([truncate(text, max_length-10) for text in texts])
+activate Embedding
+note right of Embedding
+  rag/svr/task_executor.py
+  embedding_model = LLMBundle(task["tenant_id"], LLMType.EMBEDDING, llm_name=embedding_id)
+  @timeout(60)
+  def batch_encode(txts):
+      return embedding_model.encode([truncate(c, embedding_model.max_length - 10) for c in txts])
+end note
+loop 对每个 batch (EMBEDDING_BATCH_SIZE)
+    Executor -> Embedding: await trio.to_thread.run_sync(lambda: batch_encode(texts[i : i + settings.EMBEDDING_BATCH_SIZE]))
+    Embedding -> Embedding: encode(texts) - 生成向量
+    Embedding --> Executor: 返回 vects (numpy array)
+end
+Executor -> Executor: 为每个 chunk 添加向量
+note right of Executor
+  for i, ck in enumerate(chunks):
+      v = vects[i].tolist()
+      ck["q_%d_vec" % len(v)] = v
+end note
+deactivate Embedding
+
+== 十、向量库存储 ==
+
+Executor -> Executor: await insert_es(task_id, task_tenant_id, task_dataset_id, chunks, progress_callback)
+note right of Executor
+  rag/svr/task_executor.py
+  async def insert_es(task_id, task_tenant_id, task_dataset_id, chunks, progress_callback)
+end note
+Executor -> Executor: 处理母块 (Mother Chunks)
+note right of Executor
+  for ck in chunks:
+      mom = ck.get("mom") or ck.get("mom_with_weight") or ""
+      if mom:
+          mom_ck = {...}
+          mothers.append(mom_ck)
+end note
+Executor -> VectorDB: await trio.to_thread.run_sync(lambda: settings.docStoreConn.insert(mothers[b:b + settings.DOC_BULK_SIZE], search.index_name(task_tenant_id), task_dataset_id))
+activate VectorDB
+VectorDB --> Executor: 插入成功
+deactivate VectorDB
+
+Executor -> VectorDB: await trio.to_thread.run_sync(lambda: settings.docStoreConn.insert(chunks[b:b + settings.DOC_BULK_SIZE], search.index_name(task_tenant_id), task_dataset_id))
+activate VectorDB
+loop 每批 DOC_BULK_SIZE 个 (b in range(0, len(chunks), settings.DOC_BULK_SIZE))
+    VectorDB -> VectorDB: 存储向量 + 元数据到 Elasticsearch/Infinity
+    VectorDB --> Executor: 插入成功
+end
+deactivate VectorDB
+
+Executor -> TaskService: TaskService.update_chunk_ids(task_id, " ".join(chunk_ids))
+activate TaskService
+note right of TaskService
+  chunk_ids = [chunk["id"] for chunk in chunks[:b + settings.DOC_BULK_SIZE]]
+  TaskService.update_chunk_ids(task_id, chunk_ids_str)
+end note
+TaskService --> Executor: 更新成功
+deactivate TaskService
+Executor -> Executor: DocumentService.increment_chunk_num(doc_id, task_dataset_id, embedding_token_consumption, len(chunks), task_time_cost)
+deactivate Executor
+
+== 十一、用户搜索/提问 ==
+
+用户 -> Frontend: 输入搜索关键词
+activate Frontend
+Frontend -> SearchAPI: POST /api/chunk/list
+activate SearchAPI
+note right of SearchAPI
+  api/apps/chunk_app.py
+  @manager.route('/list', methods=['POST'])
+  async def list_chunk()
+  req = await get_request_json()
+  doc_id = req["doc_id"]
+  question = req.get("keywords", "")
+end note
+SearchAPI -> SearchAPI: 解析请求 (doc_id, keywords, page, size)
+SearchAPI -> DocService: DocumentService.get_tenant_id(req["doc_id"])
+activate DocService
+DocService --> SearchAPI: 返回 tenant_id
+deactivate DocService
+
+== 十二、向量库检索 ==
+
+SearchAPI -> SearchAPI: settings.retriever.search(query, search.index_name(tenant_id), kb_ids, highlight=["content_ltks"])
+note right of SearchAPI
+  rag/nlp/search.py
+  class Retriever
+  def search(self, req, index_names, kb_ids, embd_mdl, highlight, rank_feature)
+  - 向量相似度搜索
+  - BM25 关键词搜索
+  - 混合相似度计算
+end note
+SearchAPI -> Embedding: embd_mdl.encode([question])
+activate Embedding
+note right of Embedding
+  生成问题向量
+  question_vector = embd_mdl.encode([question])[0]
+end note
+Embedding --> SearchAPI: 返回 question_vector
+deactivate Embedding
+
+SearchAPI -> VectorDB: self.dataStore.search(query_vector=question_vector, top_k=top, filters={...}, index_name=index_name)
+activate VectorDB
+VectorDB -> VectorDB: 向量相似度搜索
+VectorDB -> VectorDB: BM25 关键词搜索
+VectorDB -> VectorDB: 混合相似度计算
+VectorDB --> SearchAPI: 返回 sres {
+    ids: [...],
+    field: {chunk_id: chunk_data, ...},
+    highlight: {chunk_id: highlighted_text, ...},
+    total: 100
+}
+deactivate VectorDB
+
+SearchAPI -> SearchAPI: 构建返回结果
+note right of SearchAPI
+  for id in sres.ids:
+      d = {
+          "chunk_id": id,
+          "content_with_weight": sres.highlight[id] if question and id in sres.highlight else sres.field[id].get("content_with_weight", ""),
+          "image_id": sres.field[id].get("img_id", ""),
+          "positions": sres.field[id].get("position_int", []),
+          ...
+      }
+      res["chunks"].append(d)
+end note
+loop 对每个匹配的 chunk
+    SearchAPI -> SearchAPI: 提取字段并添加到 res["chunks"]
+end
+SearchAPI --> Frontend: get_json_result(data=res)
+note right of SearchAPI
+  res = {
+      "total": sres.total,
+      "chunks": [...],
+      "doc": doc.to_dict()
+  }
+end note
+deactivate SearchAPI
+
+== 十三、前端展示 ==
+
+Frontend -> Frontend: 渲染 Chunk 列表
+note right of Frontend
+  web/src/pages/next-search/search-view.tsx
+  {chunks.map((chunk, index) => {
+      return (
+          <div key={index}>
+              <ImageWithPopover id={chunk.img_id}></ImageWithPopover>
+              <Popover>...</Popover>
+          </div>
+      );
+  })}
+end note
+loop 对每个 chunk in chunks
+    alt chunk.image_id 存在
+        Frontend -> DocAPI: GET /api/document/image/{img_id}
+        activate DocAPI
+        note right of DocAPI
+          api/apps/document_app.py 或其他
+          @manager.route('/document/image/<image_id>', methods=['GET'])
+          bucket, filename = image_id.split("-", 1)
+          image_data = settings.STORAGE_IMPL.get(bucket=bucket, filename=filename)
+        end note
+        DocAPI -> Storage: settings.STORAGE_IMPL.get(bucket, filename)
+        activate Storage
+        Storage --> DocAPI: 返回图片数据 (bytes)
+        deactivate Storage
+        DocAPI --> Frontend: Response(image_data, mimetype='image/jpeg')
+        deactivate DocAPI
+        Frontend -> Frontend: <ImageWithPopover id={chunk.img_id} />
+        note right of Frontend
+          web/src/components/image/index.tsx
+          <img src={`${api_host}/document/image/${id}`} />
+        end note
+    end
+    Frontend -> Frontend: 显示文本内容 (chunk.highlight 或 chunk.content_with_weight)
+    Frontend -> Frontend: 显示文档信息 (chunk.docnm_kwd)
+end
+Frontend --> 用户: 显示搜索结果
+deactivate Frontend
+
+@enduml

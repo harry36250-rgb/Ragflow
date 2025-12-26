@@ -58,21 +58,36 @@ export function SavingButton() {
       onClick={() => {
         (async () => {
           try {
-            let beValid = await form.formControl.trigger();
+            let beValid = false;
+            try {
+              const validationPromise = form.trigger();
+              const timeoutPromise = new Promise((_, reject) =>
+                setTimeout(
+                  () => reject(new Error('Validation timeout after 5 seconds')),
+                  5000,
+                ),
+              );
+
+              beValid = (await Promise.race([
+                validationPromise,
+                timeoutPromise,
+              ])) as boolean;
+            } catch (validationError) {
+              beValid = false;
+            }
+
             if (beValid) {
-              form.handleSubmit(async (values) => {
-                console.log('saveKnowledgeConfiguration: ', values);
-                delete values['parseType'];
-                // delete values['avatar'];
-                await saveKnowledgeConfiguration({
-                  kb_id,
-                  ...values,
-                });
-              })();
+              const values = form.getValues();
+              delete values['parseType'];
+              // delete values['avatar'];
+
+              await saveKnowledgeConfiguration({
+                kb_id,
+                ...values,
+              });
             }
           } catch (e) {
-            console.log(e);
-          } finally {
+            console.error('Save button error:', e);
           }
         })();
       }}
