@@ -247,13 +247,19 @@ class FulltextQueryer:
         if isinstance(qtwt, type("")):
             qtwt = {t: w for t, w in self.tw.weights(self.tw.split(qtwt), preprocess=False)}
         s = 1e-9
+        matched_keys = []
         for k, v in qtwt.items():
             if k in dtwt:
                 s += v #* dtwt[k]
+                matched_keys.append(k)
         q = 1e-9
         for k, v in qtwt.items():
             q += v #* v
-        return s/q #math.sqrt(3. * (s / q / math.log10( len(dtwt.keys()) + 512 )))
+        result = s/q
+        # 调试日志：如果相似度为0或很低，记录详细信息
+        if result < 0.01 and len(qtwt) > 0:
+            logging.warning(f"[KeywordDebug] 关键词相似度很低({result:.4f}) - 查询词: {list(qtwt.keys())[:10]}, 匹配到的词: {matched_keys[:10]}, 文档词总数: {len(dtwt)}")
+        return result #math.sqrt(3. * (s / q / math.log10( len(dtwt.keys()) + 512 )))
 
     def paragraph(self, content_tks: str, keywords: list = [], keywords_topn=30):
         if isinstance(content_tks, str):

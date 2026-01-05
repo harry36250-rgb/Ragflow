@@ -15,6 +15,7 @@
 #
 import datetime
 import json
+import logging
 import re
 
 import xxhash
@@ -287,6 +288,9 @@ async def retrieval_test():
     size = int(req.get("size", 30))
     question = req["question"]
     kb_ids = req["kb_id"]
+    
+    # 调试日志：记录API入口
+    logging.info(f"[RetrievalDebug] API入口: retrieval_test被调用, question='{question[:50]}...', kb_ids={kb_ids}, page={page}, size={size}")
     if isinstance(kb_ids, str):
         kb_ids = [kb_ids]
     if not kb_ids:
