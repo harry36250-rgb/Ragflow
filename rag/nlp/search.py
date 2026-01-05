@@ -379,6 +379,9 @@ class Dealer:
 
         # Ensure RERANK_LIMIT is multiple of page_size
         RERANK_LIMIT = math.ceil(64 / page_size) * page_size if page_size > 1 else 1
+        # 注意：这里的similarity参数是用于向量搜索的阈值，不是最终的相似度阈值
+        # 向量搜索的similarity阈值应该设置得较低，让更多结果通过，然后在后续的rerank中再过滤
+        vector_search_similarity = 0.01  # 向量搜索的阈值，设置较低以获取更多候选
         req = {
             "kb_ids": kb_ids,
             "doc_ids": doc_ids,
@@ -387,7 +390,7 @@ class Dealer:
             "question": question,
             "vector": True,
             "topk": top,
-            "similarity": similarity_threshold,
+            "similarity": vector_search_similarity,  # 使用较低的向量搜索阈值
             "available_int": 1,
         }
 
